@@ -66,6 +66,35 @@ func (m Money) Sub(n Money) (Money, error) {
 	return Money{Amount: m.Amount.Sub(n.Amount), Currency: m.Currency}, nil
 }
 
+// Mul returns m scaled by the plain (currency-less) factor qty, e.g. a unit
+// price times a line-item quantity. The result keeps m's currency and is not
+// re-rescaled to the currency's minor-unit digits — call NewMoney if you need
+// that.
+func (m Money) Mul(qty Decimal) Money {
+	return Money{Amount: m.Amount.Mul(qty), Currency: m.Currency}
+}
+
+// Cmp compares m and n numerically, failing with ErrCurrencyMismatch if the
+// currencies differ rather than silently comparing amounts in different
+// currencies.
+func (m Money) Cmp(n Money) (int, error) {
+	if m.Currency != n.Currency {
+		return 0, ErrCurrencyMismatch
+	}
+	return m.Amount.Cmp(n.Amount), nil
+}
+
+// Neg returns m with its amount negated, keeping the same currency. Useful
+// for reversals, refunds, and credit notes.
+func (m Money) Neg() Money {
+	return Money{Amount: m.Amount.Neg(), Currency: m.Currency}
+}
+
+// IsZero reports whether m's amount is exactly zero.
+func (m Money) IsZero() bool {
+	return m.Amount.IsZero()
+}
+
 // AllocateEven splits m into n shares whose amounts sum back to exactly m,
 // distributing the currency's smallest minor unit (e.g. the odd cent) to the
 // first shares. This is the standard "split the bill" / "split a refund

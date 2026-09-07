@@ -40,9 +40,15 @@ through `float64`.
   error instead of a number when an operation would actually need to round,
   so precision bugs surface immediately instead of silently drifting.
 - **Currency-aware `Money`.** Pairs an amount with an ISO 4217 currency code
-  and refuses to combine mismatched currencies; `AllocateEven` splits a total
-  into shares that always sum back to the original, distributing the
-  leftover minor unit instead of dropping it.
+  and refuses to combine mismatched currencies across `Add`, `Sub`, and
+  `Cmp`; `Mul` scales an amount by a plain quantity (a unit price times a
+  line-item quantity), `Neg` and `IsZero` round out the set, and
+  `AllocateEven` splits a total into shares that always sum back to the
+  original, distributing the leftover minor unit instead of dropping it.
+- **Exact exponentiation.** `Pow` raises a `Decimal` to a non-negative
+  integer power by exponentiating the coefficient and scaling the exponent —
+  never rounding — which is what makes `(1 + rate).Pow(periods)` a safe way
+  to compute compound interest across many periods.
 - **Immutable.** Every method returns a new value. A `Decimal` is safe to
   copy, compare, and share across goroutines.
 - **Safe serialization.** Implements `json.Marshaler`/`Unmarshaler`,
@@ -154,6 +160,22 @@ not bias a long-running sum up or down), `RoundHalfUp`, `RoundHalfDown`,
 `RoundUnnecessary`, which fails instead of rounding at all — use it wherever
 an inexact result should be treated as a bug, not a number.
 
+## Compound interest, exactly
+
+Multiplication is always exact, so raising a value to an integer power is
+too: `Pow` computes `d^n` by exponentiating the coefficient and multiplying
+the scale, never touching `float64`.
+
+```go
+rate := decimal.MustParse("1.05") // 5% interest per period
+compounded, err := rate.Pow(12)   // (1 + rate)^12
+fmt.Println(compounded, err)      // 1.795856326022129150390625 <nil>
+```
+
+`Pow` fails with `ErrExponentOutOfRange` if the resulting scale would be
+unreasonably large — the same guard `Parse` uses against a pathological
+exponent.
+
 ## Money with a currency (`Money`)
 
 ```go
@@ -168,6 +190,18 @@ shares, _ := usd.AllocateEven(3) // 33.34 / 33.33 / 33.33 — sums back to exact
 `AllocateEven` distributes the leftover minor unit instead of rounding each
 share independently, which is the classic bug that leaves split totals not
 summing back to the original amount.
+
+`Money` also carries `Mul`, `Cmp`, `Neg`, and `IsZero`, so a line item never
+has to be unwrapped into a bare `Decimal` just to be scaled or compared:
+
+```go
+unitPrice, _ := decimal.ParseMoney("19.99", "USD", decimal.RoundHalfEven)
+lineTotal := unitPrice.Mul(decimal.NewFromInt64(3)) // 59.97 USD
+
+cmp, _ := lineTotal.Cmp(usd) // -1: 59.97 < 100.00 (ErrCurrencyMismatch across currencies)
+refund := lineTotal.Neg()    // -59.97 USD, for a reversal or credit note
+refund.IsZero()              // false
+```
 
 ## Serialization without `float64`
 
@@ -200,6 +234,10 @@ isn't `encoding/json` (YAML, TOML, map keys).
 - **No implicit float64 interop.** `Float64()` exists solely to interoperate
   with non-monetary APIs (plotting, metrics) and is documented as lossy —
   never use it on a money code path.
+- **No transcendental math.** `Pow` only computes exact, non-negative integer
+  powers; there is no `Sqrt`, `Ln`, or `Exp` — those would need an internal
+  precision cutoff that conflicts with the "always exact" guarantee
+  everywhere else in this package.
 
 ## Testing
 
