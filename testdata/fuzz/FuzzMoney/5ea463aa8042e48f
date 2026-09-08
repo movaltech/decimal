@@ -1,0 +1,7 @@
+go test fuzz v1
+string("92270000000000000")
+string("0")
+string("0")
+string("1")
+byte('\x04')
+int(5)

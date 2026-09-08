@@ -1,0 +1,4 @@
+go test fuzz v1
+string("0")
+int32(-11)
+byte('\x03')

@@ -1,0 +1,5 @@
+go test fuzz v1
+string("\x8f\xcc\xfc\xe5\xfc\xe5\x8f\xcc")
+string("0")
+int32(2000000000)
+byte('\x00')

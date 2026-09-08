@@ -457,6 +457,27 @@ func TestRescaleNegativeScaleRejected(t *testing.T) {
 	}
 }
 
+func TestRescaleOversizedScaleRejected(t *testing.T) {
+	// Without an upper bound, this single call would try to allocate a
+	// billion-plus-digit result instead of failing immediately.
+	_, err := MustParse("1.23").Rescale(math.MaxInt32, RoundHalfUp)
+	if err != ErrScaleOutOfRange {
+		t.Fatalf("got %v, want ErrScaleOutOfRange", err)
+	}
+}
+
+func TestNewPanicsOnOversizedScale(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("New did not panic on an oversized scale")
+		}
+	}()
+	// A scale this large is never legitimate; without the panic, this
+	// constructs a value that later blows up the first time it's formatted
+	// or rescaled instead of failing at the point the bad value was made.
+	New(1, math.MaxInt32)
+}
+
 func TestRescaleRoundUnnecessaryFails(t *testing.T) {
 	// 2.345 cannot be rescaled to 2 places without discarding a non-zero
 	// digit, so RoundUnnecessary must reject it instead of rounding silently.
@@ -468,6 +489,13 @@ func TestRescaleRoundUnnecessaryFails(t *testing.T) {
 
 func TestQuoScaleNegativeScaleRejected(t *testing.T) {
 	_, err := MustParse("1").QuoScale(MustParse("3"), -1, RoundHalfUp)
+	if err != ErrScaleOutOfRange {
+		t.Fatalf("got %v, want ErrScaleOutOfRange", err)
+	}
+}
+
+func TestQuoScaleOversizedScaleRejected(t *testing.T) {
+	_, err := MustParse("1").QuoScale(MustParse("3"), math.MaxInt32, RoundHalfUp)
 	if err != ErrScaleOutOfRange {
 		t.Fatalf("got %v, want ErrScaleOutOfRange", err)
 	}

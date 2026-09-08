@@ -1,0 +1,4 @@
+go test fuzz v1
+string("0E70")
+int32(-22)
+byte('!')

@@ -1,0 +1,4 @@
+go test fuzz v1
+string("0e2000")
+rune('\a')
+byte('\x01')

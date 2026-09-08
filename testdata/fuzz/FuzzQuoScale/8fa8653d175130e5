@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0e40000")
+string("0")
+int32(-67)
+byte('\x05')

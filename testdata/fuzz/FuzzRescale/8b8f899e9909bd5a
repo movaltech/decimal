@@ -1,0 +1,4 @@
+go test fuzz v1
+string("\xeb\xeb\xeb\xeb\xeb\xeb\xeb\xeb")
+rune('d')
+byte('\x17')

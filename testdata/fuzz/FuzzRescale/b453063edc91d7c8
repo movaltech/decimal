@@ -1,0 +1,4 @@
+go test fuzz v1
+string("000000e00")
+rune('\x00')
+byte('\x02')

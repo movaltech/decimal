@@ -1,0 +1,7 @@
+go test fuzz v1
+string("10.00")
+string("USD")
+string(".0100")
+string("USD")
+byte('\x00')
+int(0)

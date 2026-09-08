@@ -13,6 +13,7 @@
 package decimal
 
 import (
+	"fmt"
 	"math/big"
 	"strings"
 )
@@ -86,9 +87,22 @@ func NewFromBigInt(coeff *big.Int, scale int32) Decimal {
 // NewFromInt64 returns the exact integer value i, at scale 0.
 func NewFromInt64(i int64) Decimal { return New(i, 0) }
 
+// normScale clamps a negative scale to 0 — there is no meaningful positive
+// value a negative scale could represent, so nothing is lost by discarding
+// it — and panics if scale exceeds maxParseDigits. New, NewFromBigInt, and
+// NewFromMinorUnits have no error return, so an oversized scale can't be
+// reported the way Rescale/QuoScale report ErrScaleOutOfRange; left
+// unchecked, it would silently construct a value that later blows up as a
+// multi-gigabyte allocation the first time it's formatted or rescaled
+// (e.g. New(1, 2_000_000_000).String() would try to allocate a two-billion
+// character string). A scale that large is never a legitimate value — it is
+// always a caller bug — so this fails immediately and loudly instead.
 func normScale(scale int32) int32 {
 	if scale < 0 {
 		return 0
+	}
+	if scale > maxParseDigits {
+		panic(fmt.Sprintf("decimal: scale %d exceeds maximum supported scale %d", scale, maxParseDigits))
 	}
 	return scale
 }

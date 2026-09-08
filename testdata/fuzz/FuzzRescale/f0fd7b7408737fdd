@@ -1,0 +1,4 @@
+go test fuzz v1
+string("\x80\xd2\xd2\xd2")
+rune('\x00')
+byte('\x02')

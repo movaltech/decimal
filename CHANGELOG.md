@@ -5,6 +5,38 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] - 2026-09-08
+
+### Fixed
+- `Rescale` and `QuoScale` now reject a scale above `maxParseDigits`,
+  matching the lower-bound check they already had. Previously, a single call
+  with an oversized scale (e.g. `Rescale(math.MaxInt32, ...)`) would try to
+  materialize a multi-gigabyte power of ten instead of returning
+  `ErrScaleOutOfRange`.
+- `New`, `NewFromBigInt`, and `NewFromMinorUnits` now panic if given a scale
+  above `maxParseDigits`, for the same reason — left unchecked, the
+  oversized scale wouldn't fail at construction, only later, as an
+  out-of-memory allocation the first time the value was formatted or
+  rescaled (`String()` in particular pads to the full scale with literal
+  zero characters).
+- `Pow` now also bounds the resulting coefficient's digit count, not just
+  the resulting scale. The scale check alone (`d.Scale() * n`) never
+  triggers for an integer base (`d.Scale() == 0`), so `NewFromInt64(2).Pow(n)`
+  had no upper bound on `n` at all.
+
+### Added
+- `FuzzQuoScale`, `FuzzPow`, and `FuzzMoney` — fuzz targets alongside the
+  existing `FuzzParse`/`FuzzRescale`, covering the rest of the surface that
+  takes untrusted text or a caller-supplied scale/exponent. Each ran for
+  millions of executions during development with no crashes found.
+- A corpus of discovered fuzz cases for all five targets, committed under
+  `testdata/fuzz/`, so `go test` replays them as ordinary subtests instead
+  of only benefiting from a fresh, from-scratch fuzzing session.
+- A GitHub Actions CI workflow (`.github/workflows/ci.yml`) that runs on
+  every push and pull request: `gofmt`, `go vet`, a build, the full
+  race-enabled test suite with a 100%-statement-coverage gate, a
+  benchmark compile-check, and a 30-second smoke run of each fuzz target.
+
 ## [0.1.1] - 2026-09-07
 
 ### Added
@@ -58,5 +90,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Full unit test suite, a property-based test checked against
   `math/big.Rat`, and fuzz targets for `Parse` and `Rescale`.
 
+[0.1.2]: https://github.com/diegofxm/decimal/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/diegofxm/decimal/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/diegofxm/decimal/releases/tag/v0.1.0

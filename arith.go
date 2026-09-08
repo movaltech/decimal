@@ -39,7 +39,7 @@ func (d Decimal) Mul(e Decimal) Decimal {
 // e.g. rescaling a computed tax amount to 2 places before storing it as
 // cents: total.Rescale(2, decimal.RoundHalfEven).
 func (d Decimal) Rescale(newScale int32, mode RoundingMode) (Decimal, error) {
-	if newScale < 0 {
+	if newScale < 0 || newScale > maxParseDigits {
 		return Decimal{}, ErrScaleOutOfRange
 	}
 	if newScale >= d.scale {
@@ -73,7 +73,7 @@ func (d Decimal) QuoScale(e Decimal, scale int32, mode RoundingMode) (Decimal, e
 	if e.IsZero() {
 		return Decimal{}, ErrDivisionByZero
 	}
-	if scale < 0 {
+	if scale < 0 || scale > maxParseDigits {
 		return Decimal{}, ErrScaleOutOfRange
 	}
 

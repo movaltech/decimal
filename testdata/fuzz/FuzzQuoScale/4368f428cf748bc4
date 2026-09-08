@@ -1,0 +1,5 @@
+go test fuzz v1
+string("00E000000")
+string("0000000e0")
+rune('\u0085')
+byte('\x05')

@@ -1,0 +1,5 @@
+go test fuzz v1
+string("-0")
+string("-")
+int32(-33)
+byte('\x00')

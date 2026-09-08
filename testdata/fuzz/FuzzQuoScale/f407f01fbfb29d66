@@ -1,0 +1,5 @@
+go test fuzz v1
+string("\uef16\uef16")
+string("0")
+rune('F')
+byte('\x05')

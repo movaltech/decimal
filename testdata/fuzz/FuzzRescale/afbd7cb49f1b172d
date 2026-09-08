@@ -1,0 +1,4 @@
+go test fuzz v1
+string("\xf50\xbd0")
+int32(-26)
+byte('e')

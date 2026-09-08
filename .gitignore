@@ -1,0 +1,16 @@
+# Coverage/profile output
+coverage.out
+cover.out
+*.prof
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local Go workspace files (not part of the module's own build)
+go.work
+go.work.sum

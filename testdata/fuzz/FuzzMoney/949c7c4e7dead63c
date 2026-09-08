@@ -1,0 +1,7 @@
+go test fuzz v1
+string("-1.005")
+string("0")
+string("1")
+string("BHD")
+byte('\x01')
+int(7)

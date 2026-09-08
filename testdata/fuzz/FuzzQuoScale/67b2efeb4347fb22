@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0E0")
+string("e")
+rune('v')
+byte('\x04')

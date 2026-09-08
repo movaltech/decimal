@@ -1,5 +1,6 @@
 # decimal
 
+[![CI](https://github.com/diegofxm/decimal/actions/workflows/ci.yml/badge.svg)](https://github.com/diegofxm/decimal/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/diegofxm/decimal.svg)](https://pkg.go.dev/github.com/diegofxm/decimal)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/diegofxm/decimal)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -55,15 +56,21 @@ through `float64`.
   `encoding.TextMarshaler`/`TextUnmarshaler`, and
   `database/sql/driver.Valuer`/`Scanner` — none of them ever pass through
   `float64`.
-- **Hardened parsing.** `Parse` is the intended entry point for untrusted
-  external text (user input, JSON, CSV) and bounds pathological input (e.g.
-  a scientific-notation exponent designed to blow up memory) instead of
-  trusting it.
-- **Verified, not just tested.** 100% statement coverage, clean under the
-  race detector, a property-based test that checks `QuoScale` against
-  `math/big.Rat` as an independent source of truth across thousands of
-  random cases, and fuzz tests (`FuzzParse`, `FuzzRescale`) targeting the
-  parser specifically because it is the untrusted-input boundary.
+- **Hardened against oversized scale.** Every API that accepts a scale —
+  `Parse`'s scientific-notation exponent, `Rescale`, `QuoScale`, `Pow`, and
+  the raw constructors (`New`, `NewFromBigInt`, `NewFromMinorUnits`) — bounds
+  it against the same limit, so a pathological or mistaken value (e.g. an
+  exponent designed to blow up memory, or a typo'd scale meant to be `2`)
+  fails immediately instead of allocating a multi-gigabyte result the first
+  time the value is formatted or rescaled.
+- **Verified, not just tested.** 100% statement coverage, enforced in CI, and
+  clean under the race detector. A property-based test checks `QuoScale`
+  against `math/big.Rat` as an independent source of truth across thousands
+  of random cases. Five fuzz targets (`FuzzParse`, `FuzzRescale`,
+  `FuzzQuoScale`, `FuzzPow`, `FuzzMoney`) cover every operation that takes
+  untrusted text or an attacker-influenced scale/exponent, with a corpus of
+  discovered cases committed under `testdata/fuzz/` so they run as regular
+  tests, not just during an explicit fuzzing session.
 
 ## Installation
 
@@ -249,8 +256,24 @@ This includes a property-based test (`property_test.go`) that checks
 `QuoScale` against `math/big.Rat` — an independent mathematical ground truth
 — across thousands of random cases, on top of the classic hand-picked ones
 (`0.1 + 0.2`, `19.99 * 3`, splitting a total three ways, banker's-rounding
-ties, and so on). `fuzz_test.go` fuzzes `Parse` and `Rescale` directly, since
-`Parse` is the package's boundary with untrusted external input.
+ties, and so on).
+
+`fuzz_test.go` targets every operation that takes untrusted text or a
+caller-supplied scale/exponent: `FuzzParse` and `FuzzRescale` (the original
+two), plus `FuzzQuoScale`, `FuzzPow`, and `FuzzMoney`. Each has run for
+millions of executions with no crashes found, and the corpus of interesting
+cases each run discovered is committed under `testdata/fuzz/`, so `go test`
+replays it as ordinary subtests on every run — you don't need to run a fresh
+fuzzing session to benefit from what previous ones found. To fuzz further
+and grow that corpus:
+
+```
+go test -fuzz=FuzzMoney -fuzztime=60s .
+```
+
+CI runs `go vet`, the full race-enabled test suite with a 100%-coverage
+gate, and a short (30s) smoke run of all five fuzz targets on every push and
+pull request — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ## Documentation
 
@@ -271,9 +294,11 @@ rather than rewritten in every codebase that needs it.
 ## Contributing
 
 Issues and pull requests are welcome. If you're changing rounding or parsing
-behavior, please add a test case to `decimal_test.go` or `property_test.go`
-— those two files are what this package's correctness claims actually rest
-on.
+behavior, please add a test case to `decimal_test.go` or `property_test.go`;
+if you're touching anything that takes a scale, precision, or exponent
+parameter, please also add a seed to the relevant fuzz target in
+`fuzz_test.go`. Those are what this package's correctness and safety claims
+actually rest on.
 
 ## License
 

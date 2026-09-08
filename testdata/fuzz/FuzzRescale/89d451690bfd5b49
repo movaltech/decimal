@@ -1,0 +1,4 @@
+go test fuzz v1
+string(".0A")
+rune('\x02')
+byte('b')

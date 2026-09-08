@@ -1,0 +1,5 @@
+go test fuzz v1
+string("00000000")
+string("00000000")
+int32(2000000149)
+byte('\x00')

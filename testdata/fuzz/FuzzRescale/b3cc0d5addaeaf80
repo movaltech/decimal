@@ -1,0 +1,4 @@
+go test fuzz v1
+string("0E507")
+rune('^')
+byte('\x06')

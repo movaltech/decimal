@@ -1,0 +1,5 @@
+go test fuzz v1
+string("Ŕœ")
+string("0")
+int32(-25)
+byte('\x05')

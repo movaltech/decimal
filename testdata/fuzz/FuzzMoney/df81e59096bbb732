@@ -1,0 +1,7 @@
+go test fuzz v1
+string("2E2000")
+string("\x910")
+string("0")
+string("0")
+byte('\x03')
+int(3)

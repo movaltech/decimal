@@ -22,9 +22,12 @@ var (
 	// loss instead of silently truncating a monetary value.
 	ErrRoundingNecessary = errors.New("decimal: rounding necessary but RoundUnnecessary mode is set")
 
-	// ErrScaleOutOfRange is returned when a negative scale is supplied to an
-	// API that requires scale >= 0.
-	ErrScaleOutOfRange = errors.New("decimal: scale must be >= 0")
+	// ErrScaleOutOfRange is returned when a scale outside [0, maxParseDigits]
+	// is supplied to an API that requires an in-range scale. The upper bound
+	// exists for the same reason Parse bounds a scientific-notation exponent:
+	// without it, a single Rescale/QuoScale call with an oversized scale
+	// could force a multi-gigabyte allocation.
+	ErrScaleOutOfRange = errors.New("decimal: scale must be between 0 and maxParseDigits")
 
 	// ErrPrecisionOutOfRange is returned when a Context has an invalid
 	// (negative) precision.

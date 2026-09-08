@@ -39,3 +39,15 @@ func TestDecimalPowExponentOutOfRange(t *testing.T) {
 		t.Fatalf("Pow(1_000_001) err = %v, want ErrExponentOutOfRange", err)
 	}
 }
+
+func TestDecimalPowIntegerBaseCoefficientOutOfRange(t *testing.T) {
+	// d.Scale() is 0 here, so scale(0) * n is always 0 and the scale check
+	// alone would never reject this — it's the coefficient (2^n has roughly
+	// n*log10(2) digits) that must be bounded instead. Before this guard
+	// existed, this call would run for an unreasonable amount of time and
+	// memory instead of failing immediately.
+	_, err := decimal.NewFromInt64(2).Pow(4_000_000_000)
+	if !errors.Is(err, decimal.ErrExponentOutOfRange) {
+		t.Fatalf("Pow(4_000_000_000) err = %v, want ErrExponentOutOfRange", err)
+	}
+}
