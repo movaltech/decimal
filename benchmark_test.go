@@ -3,7 +3,7 @@ package decimal_test
 import (
 	"testing"
 
-	"github.com/diegofxm/decimal"
+	"github.com/movaltech/decimal"
 )
 
 // These benchmarks exist because Decimal is backed by *big.Int, which

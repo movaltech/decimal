@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/diegofxm/decimal"
+	"github.com/movaltech/decimal"
 )
 
 func TestDecimalPow(t *testing.T) {

@@ -3,7 +3,7 @@ package decimal_test
 import (
 	"fmt"
 
-	"github.com/diegofxm/decimal"
+	"github.com/movaltech/decimal"
 )
 
 func ExampleParse() {

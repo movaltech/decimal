@@ -1,4 +1,3 @@
-// Deprecated: this module has moved to github.com/movaltech/decimal.
-module github.com/diegofxm/decimal
+module github.com/movaltech/decimal
 
 go 1.26.5

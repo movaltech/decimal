@@ -1,8 +1,8 @@
 # decimal
 
-[![CI](https://github.com/diegofxm/decimal/actions/workflows/ci.yml/badge.svg)](https://github.com/diegofxm/decimal/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/diegofxm/decimal.svg)](https://pkg.go.dev/github.com/diegofxm/decimal)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/diegofxm/decimal)](go.mod)
+[![CI](https://github.com/movaltech/decimal/actions/workflows/ci.yml/badge.svg)](https://github.com/movaltech/decimal/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/movaltech/decimal.svg)](https://pkg.go.dev/github.com/movaltech/decimal)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/movaltech/decimal)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Exact, arbitrary-precision fixed-point decimal arithmetic for Go. Built for
@@ -75,7 +75,7 @@ through `float64`.
 ## Installation
 
 ```
-go get github.com/diegofxm/decimal
+go get github.com/movaltech/decimal
 ```
 
 ## Quick start
@@ -277,7 +277,7 @@ pull request — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ## Documentation
 
-Full API reference: [pkg.go.dev/github.com/diegofxm/decimal](https://pkg.go.dev/github.com/diegofxm/decimal)
+Full API reference: [pkg.go.dev/github.com/movaltech/decimal](https://pkg.go.dev/github.com/movaltech/decimal)
 
 ## Why this exists
 
