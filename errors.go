@@ -29,9 +29,10 @@ var (
 	// could force a multi-gigabyte allocation.
 	ErrScaleOutOfRange = errors.New("decimal: scale must be between 0 and maxParseDigits")
 
-	// ErrPrecisionOutOfRange is returned when a Context has an invalid
-	// (negative) precision.
-	ErrPrecisionOutOfRange = errors.New("decimal: precision must be >= 0")
+	// ErrPrecisionOutOfRange is returned when a value has too many digits for
+	// the requested conversion, e.g. MinorUnits on an amount whose count of
+	// minor units does not fit in an int64.
+	ErrPrecisionOutOfRange = errors.New("decimal: value has too many digits to fit in an int64")
 
 	// ErrInexact is returned by QuoExact when the division does not terminate
 	// within MaxExactScale digits (e.g. 1/3).

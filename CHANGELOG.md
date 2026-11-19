@@ -5,6 +5,38 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-11-19
+
+### Fixed
+- `Parse` no longer mis-parses or panics on scientific-notation exponents
+  beyond the int64 range. The exponent accumulator used to wrap around
+  silently, so `"1e18446744073709551616"` parsed as `1`, and
+  `"1e-9223372036854775808"` panicked with a negative `strings.Repeat`
+  count. Any exponent above 2^40 in magnitude now fails with
+  `ErrExponentOutOfRange`, which is reachable from untrusted input
+  (JSON, `Scan`, `UnmarshalText`).
+- `ErrPrecisionOutOfRange` now says what it actually reports: a value with
+  too many digits to fit in an int64 (returned by `MinorUnits` and
+  `Money.AllocateEven`). Its old message, "precision must be >= 0", described
+  a case that cannot happen, because `Context.Precision` is unsigned. The
+  error variable is unchanged, so `errors.Is` checks keep working.
+
+### Changed
+- A `.gitattributes` file forces LF line endings, so `gofmt` and the tests
+  give the same result on Windows checkouts as on Linux.
+
+## [1.0.0] - 2026-09-14
+
+### Changed
+- Module path is now `github.com/movaltech/decimal`. No API changes from
+  0.1.2.
+
+## [0.1.3] - 2026-09-13
+
+### Deprecated
+- The previous module path was deprecated in favor of
+  `github.com/movaltech/decimal`.
+
 ## [0.1.2] - 2026-09-08
 
 ### Fixed
