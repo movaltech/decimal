@@ -1,0 +1,5 @@
+# Force LF on every platform: golden files and gofmt depend on it.
+* text=auto eol=lf
+*.p12 binary
+*.pfx binary
+*.zip binary
