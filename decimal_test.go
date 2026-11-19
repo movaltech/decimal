@@ -2,6 +2,7 @@ package decimal
 
 import (
 	"encoding/json"
+	"errors"
 	"math"
 	"testing"
 )
@@ -356,6 +357,23 @@ func TestParseHugeNegativeExponentRejected(t *testing.T) {
 	_, err := Parse("1e-999999999")
 	if err != ErrExponentOutOfRange {
 		t.Fatalf("got %v, want ErrExponentOutOfRange", err)
+	}
+}
+
+func TestParseExponentOverflowRejected(t *testing.T) {
+	// Regression test: exponents beyond int64 range used to wrap around
+	// silently ("1e18446744073709551616" parsed as 1) or panic inside Parse
+	// ("1e-9223372036854775808" reached strings.Repeat with a negative
+	// count). Both must fail with ErrExponentOutOfRange.
+	for _, s := range []string{
+		"1e18446744073709551616",
+		"1e-9223372036854775808",
+		"1e9223372036854775807",
+		"-2.5E+99999999999999999999999",
+	} {
+		if _, err := Parse(s); !errors.Is(err, ErrExponentOutOfRange) {
+			t.Errorf("Parse(%q): got %v, want ErrExponentOutOfRange", s, err)
+		}
 	}
 }
 

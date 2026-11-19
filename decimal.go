@@ -62,6 +62,13 @@ var powersOf10 = [...]*big.Int{
 // for untrusted external text (user input, JSON, CSV).
 const maxParseDigits = 1_000_000
 
+// maxExponent bounds the magnitude of a scientific-notation exponent while
+// it is being parsed. Any exponent beyond it would need an input of more
+// than a trillion characters to stay within maxParseDigits, and keeping it
+// far below int64's range means the scale arithmetic in Parse cannot
+// overflow.
+const maxExponent = 1 << 40
+
 func exp10(n int32) *big.Int {
 	if n >= 0 && int(n) < len(powersOf10) {
 		return powersOf10[n]
@@ -140,7 +147,7 @@ func Parse(s string) (Decimal, error) {
 		}
 		e, err := parseSignedInt(expStr)
 		if err != nil {
-			return Decimal{}, ErrInvalidSyntax
+			return Decimal{}, err
 		}
 		exp = e
 	}
@@ -232,6 +239,14 @@ func parseSignedInt(s string) (int64, error) {
 	var v int64
 	for _, c := range s {
 		v = v*10 + int64(c-'0')
+		// Without this bound the accumulator silently wraps around int64:
+		// "1e18446744073709551616" used to parse as 1, and an exponent of
+		// -9223372036854775808 made Parse panic. No exponent this large can
+		// ever yield an in-range value (see maxParseDigits), so it is
+		// rejected as soon as it is exceeded, long before any overflow.
+		if v > maxExponent {
+			return 0, ErrExponentOutOfRange
+		}
 	}
 	if neg {
 		v = -v
